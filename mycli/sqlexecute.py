@@ -1,7 +1,7 @@
 import enum
 import logging
 import re
-
+from google.cloud.sql.connector import Connector as GoogleConnector, IPTypes
 import pymysql
 from .packages import special
 from pymysql.constants import FIELD_TYPE
@@ -22,6 +22,8 @@ FIELD_TYPES.update({
 
 
 ERROR_CODE_ACCESS_DENIED = 1045
+
+ENABLE_IAM_AUTH = True
 
 
 class ServerSpecies(enum.Enum):
@@ -100,7 +102,7 @@ class SQLExecute(object):
 
     def __init__(self, database, user, password, host, port, socket, charset,
                  local_infile, ssl, ssh_user, ssh_host, ssh_port, ssh_password,
-                 ssh_key_filename, init_command=None):
+                 ssh_key_filename, init_command=None, enable_iam_auth=False):
         self.dbname = database
         self.user = user
         self.password = password
@@ -180,13 +182,23 @@ class SQLExecute(object):
         if ssl:
             ssl_context = self._create_ssl_ctx(ssl)
 
-        conn = pymysql.connect(
-            database=db, user=user, password=password, host=host, port=port,
-            unix_socket=socket, use_unicode=True, charset=charset,
-            autocommit=True, client_flag=client_flag,
-            local_infile=local_infile, conv=conv, ssl=ssl_context, program_name="mycli",
-            defer_connect=defer_connect, init_command=init_command
-        )
+        if ENABLE_IAM_AUTH:
+            conn = GoogleConnector().connect(
+                instance_connection_string=host,
+                driver="pymysql",
+                user=user,
+                db=db,
+                enable_iam_auth=True,
+                ip_type=IPTypes.PRIVATE,
+            )
+        else:
+            conn = pymysql.connect(
+                database=db, user=user, password=password, host=host, port=port,
+                unix_socket=socket, use_unicode=True, charset=charset,
+                autocommit=True, client_flag=client_flag,
+                local_infile=local_infile, conv=conv, ssl=ssl_context, program_name="mycli",
+                defer_connect=defer_connect, init_command=init_command
+            )
 
         if ssh_host:
             client = paramiko.SSHClient()

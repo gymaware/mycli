@@ -1186,6 +1186,8 @@ class MyCli(object):
               help='Character set for MySQL session.')
 @click.option('--password-file', type=click.Path(),
               help='File or FIFO path containing the password to connect to the db if not specified otherwise.')
+@click.option('--enable-iam', is_flag=False,
+              help='Use google IAM on private IP to log in.')
 @click.argument('database', default='', nargs=1)
 def cli(database, user, host, port, socket, password, dbname,
         version, verbose, prompt, logfile, defaults_group_suffix,
@@ -1194,7 +1196,7 @@ def cli(database, user, host, port, socket, password, dbname,
         tls_version, ssl_verify_server_cert, table, csv, warn, execute,
         myclirc, dsn, list_dsn, ssh_user, ssh_host, ssh_port, ssh_password,
         ssh_key_filename, list_ssh_config, ssh_config_path, ssh_config_host,
-        init_command, charset, password_file):
+        init_command, charset, password_file, enable_iam):
     """A MySQL terminal client with auto-completion and syntax highlighting.
 
     \b
@@ -1323,7 +1325,8 @@ def cli(database, user, host, port, socket, password, dbname,
         ssh_key_filename=ssh_key_filename,
         init_command=init_command,
         charset=charset,
-        password_file=password_file
+        password_file=password_file,
+        enable_iam_auth=enable_iam,
     )
 
     mycli.logger.debug('Launch Params: \n'
