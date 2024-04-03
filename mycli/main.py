@@ -1188,7 +1188,7 @@ class MyCli(object):
               help='Character set for MySQL session.')
 @click.option('--password-file', type=click.Path(),
               help='File or FIFO path containing the password to connect to the db if not specified otherwise.')
-@click.option('--enable-iam', is_flag=False,
+@click.option('--enable-iam', is_flag=True, default=False,
               help='Use google IAM on private IP to log in.')
 @click.argument('database', default='', nargs=1)
 def cli(database, user, host, port, socket, password, dbname,
