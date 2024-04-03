@@ -23,6 +23,7 @@ FIELD_TYPES.update({
 
 ERROR_CODE_ACCESS_DENIED = 1045
 
+ENABLE_IAM_AUTH = True
 
 
 class ServerSpecies(enum.Enum):
@@ -119,14 +120,12 @@ class SQLExecute(object):
         self.ssh_password = ssh_password
         self.ssh_key_filename = ssh_key_filename
         self.init_command = init_command
-        self.enable_iam_auth = enable_iam_auth
         self.connect()
 
     def connect(self, database=None, user=None, password=None, host=None,
                 port=None, socket=None, charset=None, local_infile=None,
                 ssl=None, ssh_host=None, ssh_port=None, ssh_user=None,
-                ssh_password=None, ssh_key_filename=None, init_command=None,
-                enable_iam_auth=None,):
+                ssh_password=None, ssh_key_filename=None, init_command=None):
         db = (database or self.dbname)
         user = (user or self.user)
         password = (password or self.password)
@@ -142,7 +141,6 @@ class SQLExecute(object):
         ssh_password = (ssh_password or self.ssh_password)
         ssh_key_filename = (ssh_key_filename or self.ssh_key_filename)
         init_command = (init_command or self.init_command)
-        enable_iam_auth = (enable_iam_auth or self.enable_iam_auth)
         _logger.debug(
             'Connection DB Params: \n'
             '\tdatabase: %r'
@@ -184,23 +182,13 @@ class SQLExecute(object):
         if ssl:
             ssl_context = self._create_ssl_ctx(ssl)
 
-        if enable_iam_auth:
-            conn = GoogleConnector().connect(
-                instance_connection_string=host,
-                driver="pymysql",
-                user=user,
-                db=db,
-                enable_iam_auth=True,
-                ip_type=IPTypes.PRIVATE,
-            )
-        else:
-            conn = pymysql.connect(
-                database=db, user=user, password=password, host=host, port=port,
-                unix_socket=socket, use_unicode=True, charset=charset,
-                autocommit=True, client_flag=client_flag,
-                local_infile=local_infile, conv=conv, ssl=ssl_context, program_name="mycli",
-                defer_connect=defer_connect, init_command=init_command
-            )
+        conn = pymysql.connect(
+            database=db, user=user, password=password, host=host, port=port,
+            unix_socket=socket, use_unicode=True, charset=charset,
+            autocommit=True, client_flag=client_flag,
+            local_infile=local_infile, conv=conv, ssl=ssl_context, program_name="mycli",
+            defer_connect=defer_connect, init_command=init_command
+        )
 
         if ssh_host:
             client = paramiko.SSHClient()
