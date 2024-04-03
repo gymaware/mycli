@@ -142,7 +142,7 @@ class SQLExecute(object):
         ssh_password = (ssh_password or self.ssh_password)
         ssh_key_filename = (ssh_key_filename or self.ssh_key_filename)
         init_command = (init_command or self.init_command)
-        enable_iam_auth = (enable_iam_auth is True or enable_iam_auth)
+        enable_iam_auth = (enable_iam_auth is True or self.enable_iam_auth)
         _logger.debug(
             'Connection DB Params: \n'
             '\tdatabase: %r'
